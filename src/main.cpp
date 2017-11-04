@@ -6,7 +6,11 @@
 #include <vector>
 #include "murmurhash3/murmurhash3.cpp"
 #include <cstring>
+#include <limits>
+#include "CountEstimator.cpp"
+
 void log(std::string s);
+
 std::vector <std::string> get_all_kmers(std::string input, unsigned int k_size);
 
 int main(int argc, char **argv) {
@@ -17,9 +21,22 @@ int main(int argc, char **argv) {
     char *inp_buf = "hello";
     void *out_buf = malloc(strlen(inp_buf) * sizeof(char));
     MurmurHash3_x64_128(inp_buf, strlen(inp_buf), 123213, out_buf);
-    std::cout<<"Hash is " << out_buf;
+    long hash_val = (long) out_buf;
+    std::cout << "Hash is " << hash_val;
+    CountEstimator *ce = new CountEstimator(10, 3, true, 0, false);
+    std::vector<long> v;
+    v.push_back(2);
+    v.push_back(4);
+    v.push_back(7);
+    v.push_back(10);
+    v.push_back(100);
+    std::cout<< "BIn search output " << ce->bin_search(v, 0, 4, 101) << "\n";
+    std::cout<< "BIn search output " << ce->bin_search(v, 0, 4, 1) << "\n";
+    std::cout<< "BIn search output " << ce->bin_search(v, 0, 4, 6) << "\n";
+    std::cout<< "BIn search output " << ce->bin_search(v, 0, 4, 7) << "\n";
     return 0;
 }
+
 
 std::vector <std::string> get_all_kmers(std::string input, unsigned int k_size) {
     std::vector <std::string> kmers;
