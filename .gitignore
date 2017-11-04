@@ -25,10 +25,10 @@
 *.la
 *.a
 *.lib
-
 # Executables
 *.exe
 *.out
 *.app
 /cmake-build-debug/
 /.idea/
+/bin/*
