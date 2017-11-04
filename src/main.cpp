@@ -4,6 +4,8 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include "murmurhash3/murmurhash3.cpp"
+#include <cstring>
 void log(std::string s);
 std::vector <std::string> get_all_kmers(std::string input, unsigned int k_size);
 
@@ -12,6 +14,10 @@ int main(int argc, char **argv) {
     for (std::vector<std::string>::iterator it = kmers.begin(); it != kmers.end(); ++it) {
         log(*it + "\n");
     }
+    char *inp_buf = "hello";
+    void *out_buf = malloc(strlen(inp_buf) * sizeof(char));
+    MurmurHash3_x64_128(inp_buf, strlen(inp_buf), 123213, out_buf);
+    std::cout<<"Hash is " << out_buf;
     return 0;
 }
 
