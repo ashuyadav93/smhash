@@ -4,7 +4,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include "murmurhash3/murmurhash3.cpp"
+#include "murmurhash3/murmurhash3.h"
 #include <cstring>
 #include <limits>
 #include "CountEstimator.cpp"
@@ -24,16 +24,8 @@ int main(int argc, char **argv) {
     long hash_val = (long) out_buf;
     std::cout << "Hash is " << hash_val;
     CountEstimator *ce = new CountEstimator(10, 3, true, 0, false);
-    std::vector<long> v;
-    v.push_back(2);
-    v.push_back(4);
-    v.push_back(7);
-    v.push_back(10);
-    v.push_back(100);
-    std::cout<< "BIn search output " << ce->bin_search(v, 0, 4, 101) << "\n";
-    std::cout<< "BIn search output " << ce->bin_search(v, 0, 4, 1) << "\n";
-    std::cout<< "BIn search output " << ce->bin_search(v, 0, 4, 6) << "\n";
-    std::cout<< "BIn search output " << ce->bin_search(v, 0, 4, 7) << "\n";
+    ce->add("llo");
+    ce->print_sketch();
     return 0;
 }
 
