@@ -4,30 +4,55 @@
 #include <utility>
 #include <algorithm>
 #include <cmath>
-#include "murmurhash3/murmurhash3.h"
+//#include "murmurhash3/murmurhash3.h"
+#include <functional>
+
+class Triplet_int {
+private:
+    int first;
+    int second;
+    int third;
+public:
+    Triplet_int(int f, int s, int t) {
+        this->first = f;
+        this->second = s;
+        this->third = t;
+    }
+
+    int get_first() {
+        return first;
+    }
+
+    int get_second() {
+        return second;
+    }
+
+    int get_third() {
+        return third;
+    }
+};
 
 class CountEstimator {
 private:
-    const long max_prime = 9999999999971L;
+    const unsigned long max_prime = 9999999999971L;
     const uint32_t SEED = 123213;
     int ksize;
     int n;
     //FILE* input_file_name=None,
     bool save_kmers = false;
-    std::vector<long> *predef_hash_list = NULL;
+    std::vector<unsigned long> *predef_hash_list = NULL;
     bool rev_comp = false;
-    std::vector<long> sketch_counts;
-    std::vector<long> sketch_hashes;
+    std::vector<unsigned long> sketch_counts;
+    std::vector<unsigned long> sketch_hashes;
     std::vector <std::string> sketch_kmers;
+    std::hash <std::string> hash_func;
 
-    long hash(std::string kmer) {
-        const char *inp_buf = kmer.c_str();
-        void *out_buf = malloc(strlen(inp_buf) * sizeof(char));
-        MurmurHash3_x64_128(inp_buf, strlen(inp_buf), SEED, out_buf);
-        return (long) out_buf;
+    unsigned long hash(std::string kmer) {
+        size_t hv = hash_func(kmer);
+        return (unsigned unsigned long) hv;
     }
 
-    bool is_prime(long num) {
+    bool is_prime(unsigned long num) {
         //Check if a number is prime.
         if (num < 2) {
             return false;
@@ -38,7 +63,7 @@ private:
         if (num % 2 == 0) {
             return false;
         }
-        long sqrt = (long) std::floor(std::sqrt(num));
+        unsigned long sqrt = (unsigned long) std::floor(std::sqrt(num));
         for (int i = 3; i < sqrt + 1; i += 2) {
             if (num % i == 0) {
                 return false;
@@ -48,7 +73,7 @@ private:
     }
 
 
-    long get_prime_lt_x(long target) {
+    unsigned long get_prime_lt_x(unsigned long target) {
         /* Backward-find a prime smaller than (or equal to) target.
         Step backwards until a prime number (other than 2) has been
         found.
@@ -58,7 +83,7 @@ private:
         if (target <= 1) {
             return 1;
         }
-        long i = target;
+        unsigned long i = target;
         if (i % 2) {
             i -= 1;
         }
@@ -127,8 +152,8 @@ private:
     }
 
 
-    void insert_vect_single_long(std::vector<long> *v, int pos, long val) {
-        std::vector<long>::iterator it;
+    void insert_vect_single_long(std::vector<unsigned long> *v, int pos, unsigned long val) {
+        std::vector<unsigned long>::iterator it;
         it = v->begin() + pos;
         v->insert(it, val);
     }
@@ -139,7 +164,7 @@ private:
         v->insert(it, val);
     }
 
-    void print_vec(std::vector<long> *v) {
+    void print_vec(std::vector<unsigned long> *v) {
         int len = v->size();
         for (int i = 0; i < len; i++) {
             std::cout << (*v)[i] << " ";
@@ -161,14 +186,14 @@ private:
         return kmers;
     }
 
-    int count_overlaps(std::vector<long> v1, std::vector<long> v2) {
+    Triplet_int count_overlaps(std::vector<unsigned long> v1, std::vector<unsigned long> v2) {
         int i = 0, j = 0;
         int l1 = v1.size();
         int l2 = v2.size();
         int common_count = 0;
-        int MAX_VAL = std::numeric_limits<long>::max();
-        while (i < l1 && j < l2) {
-            if (v1[i] == v2[j] && v1[i] != MAX_VAL) {
+        int MAX_VAL = std::numeric_limits<unsigned long>::max();
+        while (i < l1 && j < l2 && (v1[i] != MAX_VAL && v2[j] != MAX_VAL)) {
+            if (v1[i] == v2[j]) {
                 i++;
                 j++;
                 common_count++;
@@ -178,16 +203,18 @@ private:
                 j++;
             }
         }
-        return common_count;
+        return Triplet_int(common_count, i, j);
     }
 
 public:
-    CountEstimator(int _n, int _ksize, bool _save_kmers, std::vector<long> *predef_hash_list, bool rev_comp) {
+    CountEstimator(int _n, int _ksize, bool _save_kmers, std::vector<unsigned long> *predef_hash_list, bool rev_comp,
+                   std::hash <std::string> hasher) {
         this->n = _n;
         this->predef_hash_list = predef_hash_list;
         this->save_kmers = _save_kmers;
         this->ksize = _ksize;
         this->rev_comp = rev_comp;
+        this->hash_func = hasher;
         if (save_kmers) {
             this->sketch_kmers.resize(n);
         }
@@ -195,7 +222,7 @@ public:
         sketch_hashes.resize(n);
         for (int i = 0; i < n; i++) {
             sketch_counts[i] = 0;
-            sketch_hashes[i] = std::numeric_limits<long>::max();
+            sketch_hashes[i] = std::numeric_limits<unsigned long>::max();
         }
     }
 
@@ -207,7 +234,7 @@ public:
         return save_kmers;
     }
 
-    std::vector<long> *get_predef_hash_list() {
+    std::vector<unsigned long> *get_predef_hash_list() {
         return predef_hash_list;
     }
 
@@ -215,7 +242,7 @@ public:
         return rev_comp;
     }
 
-    int bin_search(std::vector<long> v, int left, int right, int x) {
+    int bin_search(std::vector<unsigned long> v, int left, int right, unsigned long x) {
         if (x < v[left]) {
             return left - 1;
         }
@@ -244,10 +271,10 @@ public:
         if (kmer.length() == 0) {
             return;
         }
-        long h;
+        unsigned long h;
         if (rev_comp) {
-            long h1 = hash(kmer);
-            long h2 = hash(reverse_complement(kmer));
+            unsigned long h1 = hash(kmer);
+            unsigned long h2 = hash(reverse_complement(kmer));
             h = std::min(h1, h2);
             if (h == h2) {
                 kmer = reverse_complement(kmer);
@@ -262,10 +289,9 @@ public:
                 return;
             }
         }
-//        long p = get_prime_lt_x(max_prime);
-        long p = max_prime;
+        unsigned long p = max_prime;
         h = h % p;
-        int idx = bin_search(sketch_hashes, 0, n - 1, h);
+        int idx = bin_search(sketch_hashes, 0, sketch_hashes.size() - 1, h);
         if (idx > n - 1) {
             // hash rank is greater than n
             return;
@@ -316,11 +342,11 @@ public:
         if (this->ksize != other->ksize) {
             return -1;
         }
-        std::cout << hash("ABC") << "\n";
-        std::cout << hash("ABC") << "\n";
-        int intersection_size = count_overlaps(this->sketch_hashes, other->sketch_hashes);
-        int union_size = this->n + other->n - intersection_size;
-        return (intersection_size / union_size);
+        Triplet_int tripletInt = count_overlaps(this->sketch_hashes, other->sketch_hashes);
+        std::cout << "Triplet : f: " << tripletInt.get_first() << " second: " << tripletInt.get_second() << " third: "
+                  << tripletInt.get_third() << "\n";
+        double union_size = (double) (tripletInt.get_second() + tripletInt.get_third() - tripletInt.get_first());
+        return ((double) tripletInt.get_first() / union_size);
     }
 
     void add_sequence(std::string seq) {
