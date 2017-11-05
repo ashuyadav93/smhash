@@ -242,6 +242,14 @@ public:
         return rev_comp;
     }
 
+    std::vector<std::string> get_kmers() {
+        return sketch_kmers;
+    }
+
+    int get_hashsize() {
+        return n;
+    }
+
     int bin_search(std::vector<unsigned long> v, int left, int right, unsigned long x) {
         if (x < v[left]) {
             return left - 1;
