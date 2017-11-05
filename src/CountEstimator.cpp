@@ -147,6 +147,40 @@ private:
         std::cout << "\n";
     }
 
+    std::vector <std::string> get_all_kmers(std::string input, unsigned int k_size) {
+        std::vector <std::string> kmers;
+        if (input.length() == 0) {
+            std::cout << "Can't find kmers for empty input\n";
+            return kmers;
+        }
+        int len = input.length();
+        int num_kmers = len - k_size + 1;
+        for (int i = 0; i < num_kmers; i++) {
+            kmers.push_back(input.substr(i, k_size));
+        }
+        return kmers;
+    }
+
+    int count_overlaps(std::vector<long> v1, std::vector<long> v2) {
+        int i = 0, j = 0;
+        int l1 = v1.size();
+        int l2 = v2.size();
+        int common_count = 0;
+        int MAX_VAL = std::numeric_limits<long>::max();
+        while (i < l1 && j < l2) {
+            if (v1[i] == v2[j] && v1[i] != MAX_VAL) {
+                i++;
+                j++;
+                common_count++;
+            } else if (v1[i] < v2[j]) {
+                i++;
+            } else {
+                j++;
+            }
+        }
+        return common_count;
+    }
+
 public:
     CountEstimator(int _n, int _ksize, bool _save_kmers, std::vector<long> *predef_hash_list, bool rev_comp) {
         this->n = _n;
@@ -221,7 +255,6 @@ public:
         } else {
             h = hash(kmer);
         }
-        std::cout << "Hash is : " << h << " \n";
         if (predef_hash_list != 0) {
             if (std::find(predef_hash_list->begin(), predef_hash_list->end(), h) == predef_hash_list->end()) {
                 /* predef hash list does not contain x */
@@ -231,10 +264,8 @@ public:
         }
 //        long p = get_prime_lt_x(max_prime);
         long p = max_prime;
-        std::cout << "Prime is: " << p << " \n";
         h = h % p;
         int idx = bin_search(sketch_hashes, 0, n - 1, h);
-        std::cout << "Idx is: " << idx << " \n";
         if (idx > n - 1) {
             // hash rank is greater than n
             return;
@@ -247,10 +278,7 @@ public:
                 insert_vect_single_str(&sketch_kmers, 0, kmer);
             }
             // check if size is greater than n. if yes, resize
-            print_vec(&sketch_hashes);
-            print_vec(&sketch_counts);
             resize_vects_if_reqd();
-            print_sketch();
             return;
         }
         // now is the middle case
@@ -268,7 +296,6 @@ public:
             // check if size is greater than n. if yes, resize
             resize_vects_if_reqd();
         }
-        print_sketch();
     }
 
     void print_sketch() {
@@ -285,5 +312,22 @@ public:
         }
     }
 
+    double calc_jaccard_distance(CountEstimator *other) {
+        if (this->ksize != other->ksize) {
+            return -1;
+        }
+        std::cout << hash("ABC") << "\n";
+        std::cout << hash("ABC") << "\n";
+        int intersection_size = count_overlaps(this->sketch_hashes, other->sketch_hashes);
+        int union_size = this->n + other->n - intersection_size;
+        return (intersection_size / union_size);
+    }
 
+    void add_sequence(std::string seq) {
+        std::vector <std::string> kmers = get_all_kmers(seq, this->ksize);
+        int len = kmers.size();
+        for (int i = 0; i < len; i++) {
+            add(kmers[i]);
+        }
+    }
 };
