@@ -1,6 +1,7 @@
-CXX = g++
-CXXFLAGS = -Wall -g
-SRC= ./src/minhash.cpp
-minhash: ; $(CXX) $(CXXFLAGS) $(SRC) -o ./bin/minhash
+SUBDIRS = minhash containmenthash
 
-clean: ; rm -rfv ./bin/minhash* src/*.o src/*.gch
+subdirs:
+	for dir in $(SUBDIRS); do \
+		$(MAKE) -C $$dir;  \
+	done
+clean: ; rm -rfv ./minhash/bin/minhash* ./minhash/src/*.o ./minhash/src/*.gch ./containmenthash/bin/containmenthash* ./containmenthash/src/*.o ./containmenthash/src/*.gch
