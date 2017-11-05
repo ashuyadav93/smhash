@@ -11,6 +11,7 @@
 #include "bloom_filter.hpp"
 #include <cmath>
 #include <set>
+#include <ctime>
 using namespace std;
 
 void log(std::string s);
@@ -18,13 +19,41 @@ void log(std::string s);
 std::vector <std::string> get_all_kmers(std::string input, unsigned int k_size);
 
 int main(int argc, char **argv) {
+    std::string alpha = "ACTG";
+
+    std::string seq1 = "";
+    std::string seq2 = "";
+    std::string common_string = "";
+    
+    srand(time(0));
+    for(unsigned int i = 0; i < 1000; ++i)
+    {
+    seq1 += alpha[rand() % 3];
+    }
+
+    for(unsigned int i = 0; i < 15; ++i)
+    {
+    seq2 += alpha[rand() % 3];
+    }
+
+    for(unsigned int i = 0; i < 15; ++i)
+    {
+    common_string += alpha[rand() % 3];
+    }
+
+    // common_string += 
+    // common_string = ''.join(np.random.choice(['A', 'C', 'T', 'G'], i_size))
+    // seq1 = ''.join(np.random.choice(['A', 'C', 'T', 'G'], 1000)) + common_string
+    // # Make seq2 a smaller sequence than seq1
+    // seq2 = ''.join(np.random.choice(['A', 'C', 'T', 'G'], 15)) + common_string
+
     std::hash <std::string> hash_fn;
-    CountEstimator *ce1 = new CountEstimator(5, 3, true, 0, false, hash_fn);
-    ce1->add_sequence("ATTATTATTATT");
+    CountEstimator *ce1 = new CountEstimator(50, 5, true, 0, false, hash_fn);
+    ce1->add_sequence(seq1);
     ce1->print_sketch();
    
-    CountEstimator *ce2 = new CountEstimator(5, 3, true, 0, false, hash_fn);
-    ce2->add_sequence("ATTATTATTATT");
+    CountEstimator *ce2 = new CountEstimator(50, 5, true, 0, false, hash_fn);
+    ce2->add_sequence(seq2);
     ce2->print_sketch();
 
     bloom_parameters parameters;
@@ -36,7 +65,7 @@ int main(int argc, char **argv) {
     parameters.false_positive_probability = 0.001; // 1 in 10000
 
     //Simple randomizer (optional)
-    parameters.random_seed = 0xA5A5A5A5;
+    // parameters.random_seed = 0xA5A5A5A5;
 
     if (!parameters)
     {
@@ -48,10 +77,10 @@ int main(int argc, char **argv) {
 
     //Instantiate Bloom Filter
     bloom_filter filter(parameters);
-    std::vector<std::string>str_lista = get_all_kmers("ATTATTATTATT", 3);
+    std::vector<std::string>str_lista = get_all_kmers(seq1, 5);
     std::vector<std::string>str_listb = ce2->get_kmers();
-    vector<string> kmer_lista = get_all_kmers("ATTATTATTATT", 3);
-    vector<string> kmer_listb = get_all_kmers("ATTATTATTATT", 3);
+    vector<string> kmer_lista = get_all_kmers(seq1, 5);
+    vector<string> kmer_listb = get_all_kmers(seq2, 5);
     set<string>kmer_a (kmer_lista.begin(), kmer_lista.end());
     set<string>kmer_b (kmer_listb.begin(), kmer_listb.end());
     vector<string>intersection,union_set;
@@ -83,7 +112,7 @@ int main(int argc, char **argv) {
         }
     }
 
-    int h = 5;
+    int h = ce1->get_hashsize();
     // cout<< intersect_est << " " << h;
     intersect_est -= round(parameters.false_positive_probability*h);  // adjust for the false positive rate
     cout << intersect_est << " ";
