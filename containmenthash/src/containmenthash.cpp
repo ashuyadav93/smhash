@@ -7,7 +7,7 @@
 #include "../../murmurhash3/murmurhash3.h"
 #include <cstring>
 #include <limits>
-#include "../../src/CountEstimator.cpp"
+#include "../../common/CountEstimator.cpp"
 #include "bloom_filter.hpp"
 #include <cmath>
 #include <set>
@@ -94,7 +94,7 @@ int main(int argc, char **argv) {
    
     // Insert into Bloom Filter
     
-    for (int i = 0; i < str_lista.size(); ++i)
+    for (unsigned int i = 0; i < str_lista.size(); ++i)
     {   
         if(!filter.contains(str_lista[i])) {
             kmer_len += 1;
@@ -102,7 +102,7 @@ int main(int argc, char **argv) {
         }
     }
 
-    for (int i = 0; i < str_listb.size(); ++i)
+    for (unsigned int i = 0; i < str_listb.size(); ++i)
     {
         std::cout << str_listb[i] << " ";
         if (filter.contains(str_listb[i]))
