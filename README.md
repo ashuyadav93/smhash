@@ -12,4 +12,4 @@ Ashish Yadav (ID#: , )
 1. `make clean`
 2. `make`
 3. Run `./minhash/bin/minhash`
-4. Run './containmenthash/bin/containmenthash'
+4. Run `./containmenthash/bin/containmenthash`
