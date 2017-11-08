@@ -10,5 +10,6 @@ Ashish Yadav (ID#: , )
 
 ### How to run
 1. `make clean`
-2. `make minhash`
-3. Run `./bin/minhash`
+2. `make`
+3. Run `./minhash/bin/minhash`
+4. Run './containmenthash/bin/containmenthash'
