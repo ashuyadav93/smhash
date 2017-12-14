@@ -11,5 +11,4 @@ Ashish Yadav (ID#: , 111486009, ashyadav)
 ### How to run
 1. `make clean`
 2. `make`
-3. Run `./minhash/bin/minhash`
-4. Run `./containmenthash/bin/containmenthash`
+3. Run `./containmenthash/bin/containmenthash`
