@@ -1,10 +1,6 @@
-//
-// Created by Vaibhav Rustagi on 11/04/17.
-//
 #include <iostream>
 #include <string>
 #include <vector>
-#include "../../murmurhash3/murmurhash3.h"
 #include <cstring>
 #include <limits>
 #include "../../common/CountEstimator.cpp"
@@ -12,6 +8,7 @@
 #include <cmath>
 #include <set>
 #include <ctime>
+#include <fstream>
 using namespace std;
 
 int i_size(double j, int k, int n) {
@@ -34,43 +31,63 @@ int main(int argc, char **argv) {
         ir.push_back(i_size(i, 11, 10000));
     }
 
-    for(int k=0; k<ir.size();k++) {
-        std::string seq1 = "";
-        std::string seq2 = "";
+
+    ifstream ina("../Genomes/PRJNA109269.fna");
+    ifstream inb("../Genomes/query.txt");
+    std::string seq1 = "";
+    std::string seq2 = "";
+    string txt;
+    string input = "";
+    vector<string>str;
+    getline(ina, txt);
+    // getline(ina, seq1);
+    while(getline(ina,txt)) {
+        if(txt[0] == '>') {
+          str.push_back(input);
+          input = "";
+        } else {
+          input += txt;
+        }
+    }
+    seq1 = input;
+
+    while(getline(inb, seq2)) {
+        // std::string seq1 = "";
+        // std::string seq2 = "";
         std::string common_string = "";
-        //cout<<ir[k]<<endl;
+        // //cout<<ir[k]<<endl;
         srand(time(0));
-        for(unsigned int i = 0; i < 10000; ++i)
-        {
-        seq1 += alpha[rand() % 3];
-        }
+        // for(unsigned int i = 0; i < 10000; ++i)
+        // {
+        // seq1 += alpha[rand() % 3];
+        // }
 
-        for(unsigned int i = 0; i < 15; ++i)
-        {
-        seq2 += alpha[rand() % 3];
-        }
+        // for(unsigned int i = 0; i < 15; ++i)
+        // {
+        // seq2 += alpha[rand() % 3];
+        // }
 
-        for(unsigned int i = 0; i < ir[k]; i++)
+        for(unsigned int i = 0; i < 100; i++)
         {
-        common_string += alpha[rand() % 3];
+           common_string += alpha[rand() % 3];
         }
 
         seq1 += common_string;
         seq2 += common_string;
 
         std::hash <std::string> hash_fn;
-        CountEstimator *ce1 = new CountEstimator(100, 11, true, 0, false, hash_fn);
+        CountEstimator *ce1 = new CountEstimator(100, 5, true, 0, false, hash_fn);
         ce1->add_sequence(seq1);
         // ce1->print_sketch();
        
-        CountEstimator *ce2 = new CountEstimator(100, 11, true, 0, false, hash_fn);
+        CountEstimator *ce2 = new CountEstimator(100, 5, true, 0, false, hash_fn);
         ce2->add_sequence(seq2);
         // ce2->print_sketch();
         
         bloom_parameters parameters;
 
         //How many elements roughly do we expect to insert?
-        parameters.projected_element_count = 10000 + ir[k];
+        parameters.projected_element_count = 40000;
 
         //Maximum tolerable false positive probability? (0,1)
         parameters.false_positive_probability = 0.001; // 1 in 1000
@@ -87,10 +104,10 @@ int main(int argc, char **argv) {
         parameters.compute_optimal_parameters();
         //Instantiate Bloom Filter
         bloom_filter filter(parameters);
-        std::vector<std::string>str_lista = get_all_kmers(seq1, 11);
+        std::vector<std::string>str_lista = get_all_kmers(seq1, 5);
         std::vector<std::string>str_listb = ce2->get_kmers();
-        vector<string> kmer_lista = get_all_kmers(seq1, 11);
-        vector<string> kmer_listb = get_all_kmers(seq2, 11);
+        vector<string> kmer_lista = get_all_kmers(seq1, 5);
+        vector<string> kmer_listb = get_all_kmers(seq2, 5);
         set<string>kmer_a (kmer_lista.begin(), kmer_lista.end());
         set<string>kmer_b (kmer_listb.begin(), kmer_listb.end());
         vector<string>intersection,union_set;
