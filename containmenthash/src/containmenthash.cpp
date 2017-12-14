@@ -40,6 +40,7 @@ int main(int argc, char **argv) {
     string input = "";
     vector<string>str;
     getline(ina, txt);
+
     // getline(ina, seq1);
     while(getline(ina,txt)) {
         if(txt[0] == '>') {
@@ -50,13 +51,70 @@ int main(int argc, char **argv) {
         }
     }
     seq1 = input;
+    std::string common_string = "";
+        // //cout<<ir[k]<<endl;
+    srand(time(0));
+
+    for(unsigned int i = 0; i < 100; i++)
+    {
+        common_string += alpha[rand() % 3];
+    }
+
+    seq1 += common_string;
+
+    bloom_parameters parameters;
+
+    //How many elements roughly do we expect to insert?
+    parameters.projected_element_count = 40000;
+
+    //Maximum tolerable false positive probability? (0,1)
+    parameters.false_positive_probability = 0.001; // 1 in 1000
+
+    //Simple randomizer (optional)
+    // parameters.random_seed = 0xA5A5A5A5;
+
+    if (!parameters)
+    {
+        std::cout << "Error - Invalid set of bloom filter parameters!" << std::endl;
+        return 1;
+    }
+
+    parameters.compute_optimal_parameters();
+    //Instantiate Bloom Filter
+    bloom_filter filter(parameters);
+    std::vector<std::string>str_lista = get_all_kmers(seq1, 5);
+    vector<string> kmer_lista = get_all_kmers(seq1, 5);
+    set<string>kmer_a (kmer_lista.begin(), kmer_lista.end());
+
+    int kmer_len = 0;
+        
+        // Insert into Bloom Filter
+    set<string>::iterator iter = kmer_a.begin();
+    for (iter = kmer_a.begin(); iter != kmer_a.end(); iter++)
+    {   
+        if(!filter.contains(*iter)) {
+            kmer_len += 1;
+            filter.insert(*iter);
+        }
+    }
+
+    //  std::string common_string = "";
+    //     // //cout<<ir[k]<<endl;
+    // srand(time(0));
+
+    // for(unsigned int i = 0; i < 100; i++)
+    // {
+    //     common_string += alpha[rand() % 3];
+    // }
+
+    // seq1 += common_string;
 
     while(getline(inb, seq2)) {
         // std::string seq1 = "";
         // std::string seq2 = "";
-        std::string common_string = "";
-        // //cout<<ir[k]<<endl;
-        srand(time(0));
+        // std::string common_string = "";
+        // // //cout<<ir[k]<<endl;
+        // srand(time(0));
         // for(unsigned int i = 0; i < 10000; ++i)
         // {
         // seq1 += alpha[rand() % 3];
@@ -67,12 +125,12 @@ int main(int argc, char **argv) {
         // seq2 += alpha[rand() % 3];
         // }
 
-        for(unsigned int i = 0; i < 100; i++)
-        {
-           common_string += alpha[rand() % 3];
-        }
+        // for(unsigned int i = 0; i < 100; i++)
+        // {
+        //    common_string += alpha[rand() % 3];
+        // }
 
-        seq1 += common_string;
+        // seq1 += common_string;
         seq2 += common_string;
 
         std::hash <std::string> hash_fn;
@@ -84,31 +142,31 @@ int main(int argc, char **argv) {
         ce2->add_sequence(seq2);
         // ce2->print_sketch();
         
-        bloom_parameters parameters;
+        // bloom_parameters parameters;
 
-        //How many elements roughly do we expect to insert?
-        parameters.projected_element_count = 40000;
+        // //How many elements roughly do we expect to insert?
+        // parameters.projected_element_count = 40000;
 
-        //Maximum tolerable false positive probability? (0,1)
-        parameters.false_positive_probability = 0.001; // 1 in 1000
+        // //Maximum tolerable false positive probability? (0,1)
+        // parameters.false_positive_probability = 0.001; // 1 in 1000
 
         //Simple randomizer (optional)
         // parameters.random_seed = 0xA5A5A5A5;
 
-        if (!parameters)
-        {
-            std::cout << "Error - Invalid set of bloom filter parameters!" << std::endl;
-            return 1;
-        }
+        // if (!parameters)
+        // {
+        //     std::cout << "Error - Invalid set of bloom filter parameters!" << std::endl;
+        //     return 1;
+        // }
 
-        parameters.compute_optimal_parameters();
-        //Instantiate Bloom Filter
-        bloom_filter filter(parameters);
-        std::vector<std::string>str_lista = get_all_kmers(seq1, 5);
+        // parameters.compute_optimal_parameters();
+        // //Instantiate Bloom Filter
+        // bloom_filter filter(parameters);
+        //std::vector<std::string>str_lista = get_all_kmers(seq1, 5);
         std::vector<std::string>str_listb = ce2->get_kmers();
-        vector<string> kmer_lista = get_all_kmers(seq1, 5);
+        //vector<string> kmer_lista = get_all_kmers(seq1, 5);
         vector<string> kmer_listb = get_all_kmers(seq2, 5);
-        set<string>kmer_a (kmer_lista.begin(), kmer_lista.end());
+        //set<string>kmer_a (kmer_lista.begin(), kmer_lista.end());
         set<string>kmer_b (kmer_listb.begin(), kmer_listb.end());
         vector<string>intersection,union_set;
 
@@ -117,17 +175,17 @@ int main(int argc, char **argv) {
 
         true_jaccard.push_back(intersection.size()/double(union_set.size()));
         int intersect_est = 0; // intersection estimate
-        int kmer_len = 0;
+        // int kmer_len = 0;
         
-        // Insert into Bloom Filter
-        set<string>::iterator iter = kmer_a.begin();
-        for (iter = kmer_a.begin(); iter != kmer_a.end(); iter++)
-        {   
-            if(!filter.contains(*iter)) {
-                kmer_len += 1;
-                filter.insert(*iter);
-            }
-        }
+        // // Insert into Bloom Filter
+        // set<string>::iterator iter = kmer_a.begin();
+        // for (iter = kmer_a.begin(); iter != kmer_a.end(); iter++)
+        // {   
+        //     if(!filter.contains(*iter)) {
+        //         kmer_len += 1;
+        //         filter.insert(*iter);
+        //     }
+        // }
 
         for (unsigned int i = 0; i < str_listb.size(); ++i)
         {
